@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+  ffmpeg:
+    image: jrottenberg/ffmpeg:latest
+    devices:
+      - /dev/video0:/dev/video0
+    volumes:
+      - ./image.jpg:/tmp/workdir/image.jpg
+    entrypoint: ffmpeg -re -loop 1 -i image.jpg -vcodec rawvideo -pix_fmt yuv420p -f v4l2 /dev/video0
+
+  chrome:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - 7900:7900
+    shm_size: 2gb
+    devices:
+      - /dev/video0:/dev/video0
+  python:
+    image: niggowai/python-autosnap
+    environment:
+      - chromedriverhost=chrome
+      - snap_nonce=$snap_nonce
+      - snap_session=$snap_session
